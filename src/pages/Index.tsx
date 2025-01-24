@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/Navbar";
 import { FieldTabs } from "@/components/FieldTabs";
 import { NewsGrid } from "@/components/NewsGrid";
+import { TrendingNews } from "@/components/TrendingNews";
 import { Footer } from "@/components/Footer";
 
 const Index = () => {
@@ -25,6 +26,8 @@ const Index = () => {
         <FieldTabs />
         
         <section className="mt-12">
+          <TrendingNews />
+          
           <h2 className="text-2xl font-semibold mb-8">Latest News</h2>
           <NewsGrid />
         </section>
