@@ -37,7 +37,7 @@ export const NewsGrid = () => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       {newsItems.map((item, index) => (
-        <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
+        <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow bg-[#F2FCE2]">
           <img src={item.image} alt={item.title} className="w-full h-40 object-cover" />
           <CardHeader className="p-4">
             <div className="text-sm text-primary font-medium">{item.category}</div>
