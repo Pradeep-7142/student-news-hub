@@ -40,7 +40,7 @@ export const TrendingNews = () => {
         }}
         plugins={[
           Autoplay({
-            delay: 4000,
+            delay: 2000,
             stopOnInteraction: false,
             stopOnMouseEnter: true,
           }),
@@ -50,7 +50,7 @@ export const TrendingNews = () => {
         <CarouselContent>
           {trendingNews.map((news, index) => (
             <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/4">
-              <Card className="h-32">
+              <Card className="h-32 bg-[#F2FCE2] hover:shadow-md transition-shadow">
                 <CardHeader className="p-4">
                   <div className="text-sm text-primary font-medium">{news.category}</div>
                   <CardTitle className="text-base">{news.title}</CardTitle>

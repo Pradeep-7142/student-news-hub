@@ -1,30 +1,28 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogIn, Search } from "lucide-react";
 
 export const Navbar = () => {
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-purple-100/90 backdrop-blur-sm z-50 border-b border-purple-200">
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <img src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=50&h=50&fit=crop" alt="Logo" className="w-10 h-10 rounded-full object-cover" />
-          <span className="font-bold text-xl text-primary">StudentNews</span>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="relative hidden sm:flex items-center">
-            <Input
-              type="search"
-              placeholder="Search news..."
-              className="w-[200px] lg:w-[300px] pr-8"
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-purple-500/80 border-b border-purple-400 backdrop-blur-sm">
+      <div className="container mx-auto px-4">
+        <div className="h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <img 
+              src="https://images.unsplash.com/photo-1501286353178-1ec881214838?auto=format&fit=crop&w=32&h=32" 
+              alt="Website Logo" 
+              className="w-8 h-8 rounded-full object-cover"
             />
-            <Search className="w-4 h-4 absolute right-3 text-muted-foreground" />
+            <span className="text-xl font-semibold text-white">Student News Hub</span>
           </div>
           
-          <Button className="flex items-center gap-2">
-            <LogIn className="w-4 h-4" />
-            Login
-          </Button>
+          <div className="flex items-center gap-4">
+            <Input
+              type="search"
+              placeholder="Search..."
+              className="w-[200px] lg:w-[300px]"
+            />
+            <Button variant="secondary">Login</Button>
+          </div>
         </div>
       </div>
     </nav>
