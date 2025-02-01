@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AuthDialog } from "./auth/AuthDialog";
 
 export const Navbar = () => {
   return (
@@ -21,7 +22,7 @@ export const Navbar = () => {
               placeholder="Search..."
               className="w-[200px] lg:w-[300px]"
             />
-            <Button variant="secondary">Login</Button>
+            <AuthDialog />
           </div>
         </div>
       </div>
