@@ -1,16 +1,19 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
 import psycopg2
 import re
 from datetime import datetime
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 # --- Flask App Setup ---
 app = Flask(__name__)
 CORS(app)
 
 # --- Configuration ---
-NEWS_API_KEY = "YOUR_API_KEY"  # Replace with actual News API key
+GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID"  # You'll replace this with your actual client ID
+NEWS_API_KEY = "YOUR_API_KEY"
 NEWS_API_URL = "https://newsapi.org/v2/everything"
 QUERY = "education OR university OR college OR scholarships"
 LANGUAGE = "en"
@@ -24,7 +27,6 @@ DB_CONFIG = {
     "port": "5432"
 }
 
-# --- Preprocessing Function ---
 def preprocess_text(text):
     """Clean and preprocess text for storage."""
     if not text:
@@ -73,7 +75,77 @@ def save_to_postgres(data):
     conn.close()
     print(f"Successfully inserted {len(data)} articles.")
 
-# --- Fetch News Articles ---
+@app.route('/api/auth/google', methods=['POST'])
+def google_auth():
+    try:
+        token = request.json.get('token')
+        
+        # Verify the token
+        idinfo = id_token.verify_oauth2_token(
+            token, google_requests.Request(), GOOGLE_CLIENT_ID)
+
+        # Get user info from the token
+        user_data = {
+            'email': idinfo['email'],
+            'name': idinfo.get('name', ''),
+            'picture': idinfo.get('picture', '')
+        }
+
+        # Connect to database
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+
+        # Create users table if it doesn't exist
+        create_table_query = '''
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            name TEXT,
+            college TEXT,
+            location TEXT,
+            branch TEXT,
+            goal TEXT,
+            year_of_study TEXT,
+            picture TEXT,
+            auth_type TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        '''
+        cursor.execute(create_table_query)
+
+        # Check if user exists
+        cursor.execute("SELECT * FROM users WHERE email = %s", (user_data['email'],))
+        existing_user = cursor.fetchone()
+
+        if not existing_user:
+            # Insert new user
+            insert_query = '''
+            INSERT INTO users (email, name, picture, auth_type)
+            VALUES (%s, %s, %s, 'google')
+            RETURNING id;
+            '''
+            cursor.execute(insert_query, (
+                user_data['email'],
+                user_data['name'],
+                user_data['picture']
+            ))
+            user_id = cursor.fetchone()[0]
+        else:
+            user_id = existing_user[0]
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'user': user_data,
+            'userId': user_id
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
 def fetch_news():
     """Fetch news articles from API."""
     params = {
