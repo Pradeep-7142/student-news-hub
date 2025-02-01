@@ -10,23 +10,39 @@ import { ChevronDown } from "lucide-react";
 const fields = [
   {
     name: "Engineering",
-    subFields: ["Computer Science", "Mechanical", "Electrical", "Civil"],
+    subFields: ["Computer Science", "Mechanical", "Electrical", "Civil", "Chemical", "Aerospace", "Software", "Biomedical"],
   },
   {
     name: "Medicine",
-    subFields: ["MBBS", "Dentistry", "Pharmacy", "Nursing"],
+    subFields: ["MBBS", "Dentistry", "Pharmacy", "Nursing", "Physiotherapy", "Public Health", "Veterinary"],
   },
   {
     name: "Business",
-    subFields: ["Finance", "Marketing", "Management", "Economics"],
+    subFields: ["Finance", "Marketing", "Management", "Economics", "Accounting", "International Business", "Entrepreneurship"],
   },
   {
     name: "Arts",
-    subFields: ["Literature", "History", "Philosophy", "Fine Arts"],
+    subFields: ["Literature", "History", "Philosophy", "Fine Arts", "Music", "Theater", "Film Studies", "Languages"],
   },
   {
     name: "Science",
-    subFields: ["Physics", "Chemistry", "Biology", "Mathematics"],
+    subFields: ["Physics", "Chemistry", "Biology", "Mathematics", "Environmental Science", "Astronomy", "Geology"],
+  },
+  {
+    name: "Social Sciences",
+    subFields: ["Psychology", "Sociology", "Political Science", "Anthropology", "Geography", "Social Work"],
+  },
+  {
+    name: "Law",
+    subFields: ["Criminal Law", "Civil Law", "Corporate Law", "International Law", "Constitutional Law"],
+  },
+  {
+    name: "Technology",
+    subFields: ["Information Technology", "Data Science", "Artificial Intelligence", "Cybersecurity", "Cloud Computing"],
+  },
+  {
+    name: "Design",
+    subFields: ["Graphic Design", "Industrial Design", "Fashion Design", "Interior Design", "UX/UI Design"],
   },
 ];
 
