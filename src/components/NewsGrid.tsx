@@ -2,13 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 
-interface NewsItem {
-  title: string;
-  image: string;
-  category: string;
-}
-
-const fetchNews = async (): Promise<NewsItem[]> => {
+const fetchNews = async () => {
   const response = await fetch('http://localhost:5000/api/news');
   if (!response.ok) {
     throw new Error('Failed to fetch news');
