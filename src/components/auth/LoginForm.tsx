@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -23,45 +24,66 @@ export const LoginForm = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    // Add your regular login logic here
-  };
-
-  const handleGoogleLogin = async () => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Load the Google API script
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      document.body.appendChild(script);
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
 
-      script.onload = () => {
-        // Initialize Google Sign-In
-        window.google.accounts.id.initialize({
-          client_id: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your client ID
-          callback: handleGoogleResponse
-        });
+      const data = await response.json();
 
-        window.google.accounts.id.prompt((notification: any) => {
-          if (notification.isNotDisplayed()) {
-            console.error('Google Sign-In popup was blocked');
-          }
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Successfully logged in",
         });
-      };
+        // Store the token
+        localStorage.setItem('token', data.token);
+        // You might want to redirect or update UI state here
+      } else {
+        throw new Error(data.error || 'Login failed');
+      }
     } catch (error) {
-      console.error('Google Sign-In error:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to initialize Google Sign-In"
+        description: error instanceof Error ? error.message : "Login failed",
       });
     }
   };
 
+  const handleGoogleLogin = () => {
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      window.google.accounts.id.initialize({
+        client_id: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your actual client ID
+        callback: handleGoogleResponse,
+      });
+
+      window.google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed()) {
+          console.error('Google Sign-In popup was blocked');
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Google Sign-In popup was blocked",
+          });
+        }
+      });
+    };
+  };
+
   const handleGoogleResponse = async (response: any) => {
     try {
-      // Send the token to your backend
       const result = await fetch('http://localhost:5000/api/auth/google', {
         method: 'POST',
         headers: {
@@ -77,7 +99,8 @@ export const LoginForm = () => {
           title: "Success",
           description: "Successfully logged in with Google"
         });
-        // Handle successful login (e.g., store user data, redirect)
+        localStorage.setItem('token', data.token);
+        // You might want to redirect or update UI state here
       } else {
         throw new Error(data.error || 'Failed to authenticate');
       }
