@@ -1,4 +1,3 @@
-
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
@@ -31,6 +30,9 @@ DB_CONFIG = {
     "host": "localhost",
     "port": "5432"
 }
+
+# Flag to track if initial data has been fetched
+initial_fetch_done = False
 
 def init_db():
     """Initialize database tables."""
@@ -155,12 +157,28 @@ def get_random_articles(count=6):
         return articles
     except Exception as e:
         print(f"Error fetching random articles: {e}")
-        return get_fallback_news()
+        return []
     finally:
         if 'cursor' in locals():
             cursor.close()
         if 'conn' in locals():
             conn.close()
+
+def get_fallback_news():
+    """Return fallback news when API or DB fails."""
+    return [
+        {
+            "title": "Education News Placeholder",
+            "content": "This is a placeholder article when the news service is unavailable.",
+            "description": "Placeholder description for education news.",
+            "category": "Education",
+            "source": "Local News",
+            "author": "System",
+            "publish_date": datetime.utcnow().isoformat(),
+            "url": "https://example.com",
+            "image": "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=300&fit=crop"
+        }
+    ] * 6  # Return 6 copies of the fallback article
 
 @app.route('/api/auth/signup', methods=['POST'])
 def signup():
@@ -320,9 +338,13 @@ def google_auth():
 
 @app.route('/api/news', methods=['GET'])
 def get_news():
+    global initial_fetch_done
     try:
-        # Fetch and save all articles first
-        if NEWS_API_KEY and NEWS_API_KEY != "YOUR_API_KEY":
+        # Check if we already have articles in the database
+        existing_articles = get_random_articles(1)
+        
+        # If we haven't fetched initially and there are no articles, fetch from API
+        if not initial_fetch_done and not existing_articles and NEWS_API_KEY and NEWS_API_KEY != "YOUR_API_KEY":
             params = {
                 "q": QUERY,
                 "language": LANGUAGE,
@@ -349,9 +371,14 @@ def get_news():
             
             # Save all articles to database
             save_to_postgres(processed_articles)
+            initial_fetch_done = True
+            print("Initial fetch completed and saved to database.")
         
         # Get random articles from database
         articles = get_random_articles(6)
+        if not articles:
+            return jsonify(get_fallback_news())
+            
         return jsonify(articles)
         
     except Exception as e:
