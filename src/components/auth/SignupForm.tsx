@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -5,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useToast } from "@/components/ui/use-toast";
 import * as z from "zod";
 import { FcGoogle } from "react-icons/fc";
 
@@ -20,6 +22,8 @@ const formSchema = z.object({
 });
 
 export const SignupForm = () => {
+  const { toast } = useToast();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,13 +38,88 @@ export const SignupForm = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    // Add your signup logic here
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Account created successfully",
+        });
+        localStorage.setItem('token', data.token);
+        // Close dialog or redirect here
+      } else {
+        throw new Error(data.error || 'Failed to create account');
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create account",
+      });
+    }
   };
 
   const handleGoogleSignup = () => {
-    // Add your Google signup logic here
+    // Initialize Google Sign-In
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      window.google.accounts.id.initialize({
+        client_id: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your actual client ID
+        callback: handleGoogleResponse,
+      });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById('google-signup-button')!,
+        { theme: 'outline', size: 'large', width: '100%' }
+      );
+    };
+  };
+
+  const handleGoogleResponse = async (response: any) => {
+    try {
+      const result = await fetch('http://localhost:5000/api/auth/google', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: response.credential })
+      });
+
+      const data = await result.json();
+
+      if (data.success) {
+        toast({
+          title: "Success",
+          description: "Successfully signed up with Google"
+        });
+        localStorage.setItem('token', data.token);
+        // Close dialog or redirect here
+      } else {
+        throw new Error(data.error || 'Failed to authenticate');
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to authenticate with Google"
+      });
+    }
   };
 
   return (
@@ -178,6 +257,8 @@ export const SignupForm = () => {
           </span>
         </div>
       </div>
+
+      <div id="google-signup-button"></div>
 
       <Button
         variant="outline"

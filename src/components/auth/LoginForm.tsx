@@ -41,9 +41,8 @@ export const LoginForm = () => {
           title: "Success",
           description: "Successfully logged in",
         });
-        // Store the token
         localStorage.setItem('token', data.token);
-        // You might want to redirect or update UI state here
+        // Close dialog or redirect here
       } else {
         throw new Error(data.error || 'Login failed');
       }
@@ -57,6 +56,7 @@ export const LoginForm = () => {
   };
 
   const handleGoogleLogin = () => {
+    // Initialize Google Sign-In
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
@@ -69,16 +69,10 @@ export const LoginForm = () => {
         callback: handleGoogleResponse,
       });
 
-      window.google.accounts.id.prompt((notification: any) => {
-        if (notification.isNotDisplayed()) {
-          console.error('Google Sign-In popup was blocked');
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Google Sign-In popup was blocked",
-          });
-        }
-      });
+      window.google.accounts.id.renderButton(
+        document.getElementById('google-login-button')!,
+        { theme: 'outline', size: 'large', width: '100%' }
+      );
     };
   };
 
@@ -100,7 +94,7 @@ export const LoginForm = () => {
           description: "Successfully logged in with Google"
         });
         localStorage.setItem('token', data.token);
-        // You might want to redirect or update UI state here
+        // Close dialog or redirect here
       } else {
         throw new Error(data.error || 'Failed to authenticate');
       }
@@ -158,6 +152,8 @@ export const LoginForm = () => {
           </span>
         </div>
       </div>
+
+      <div id="google-login-button"></div>
 
       <Button
         variant="outline"
